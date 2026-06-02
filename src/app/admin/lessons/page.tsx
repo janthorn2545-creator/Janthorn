@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { formatDuration } from '@/lib/utils'
+import DeleteLessonButton from './DeleteLessonButton'
 
 export default async function LessonsPage({ searchParams }: { searchParams: Promise<{ course?: string }> }) {
   const { course: courseId } = await searchParams
@@ -11,7 +12,7 @@ export default async function LessonsPage({ searchParams }: { searchParams: Prom
   const { data: lessons } = courseId
     ? await supabase.from('lessons').select('*').eq('course_id', courseId).order('order_index')
     : { data: [] }
-  const selectedCourse = courses?.find(c => c.id === courseId)
+  const selectedCourse = courses?.find((c: any) => c.id === courseId)
 
   return (
     <div className="p-6 max-w-5xl">
@@ -28,7 +29,6 @@ export default async function LessonsPage({ searchParams }: { searchParams: Prom
         )}
       </div>
 
-      {/* Course selector */}
       <div className="flex gap-2 flex-wrap mb-5">
         {(courses || []).map((c: any) => (
           <Link key={c.id} href={`/admin/lessons?course=${c.id}`}
@@ -59,14 +59,18 @@ export default async function LessonsPage({ searchParams }: { searchParams: Prom
                   <td className="px-4 py-3 font-medium text-gray-900">{l.title}</td>
                   <td className="px-4 py-3">
                     {l.youtube_id ? (
-                      <span className="font-mono text-xs bg-red-50 text-red-700 px-2 py-0.5 rounded">
-                        {l.youtube_id}
-                      </span>
+                      <span className="font-mono text-xs bg-red-50 text-red-700 px-2 py-0.5 rounded">{l.youtube_id}</span>
                     ) : <span className="text-gray-400 text-xs">—</span>}
                   </td>
                   <td className="px-4 py-3 text-gray-500 text-xs">{formatDuration(l.duration_sec)}</td>
                   <td className="px-4 py-3">
-                    <button className="text-xs text-blue-600 hover:text-blue-800 font-medium">แก้ไข</button>
+                    <div className="flex gap-2">
+                      <Link href={`/admin/lessons/${l.id}/edit?course=${courseId}`}
+                        className="text-xs text-blue-600 hover:text-blue-800 font-medium border border-blue-200 px-2.5 py-1 rounded-lg hover:bg-blue-50 transition-colors">
+                        แก้ไข
+                      </Link>
+                      <DeleteLessonButton lessonId={l.id} courseId={courseId} />
+                    </div>
                   </td>
                 </tr>
               ))}
