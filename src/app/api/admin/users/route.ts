@@ -9,19 +9,18 @@ export async function POST(req: NextRequest) {
   const { data: profile } = await supabase.from('users').select('role').eq('id', user.id).single()
   if (profile?.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
-  const { full_name, email, password, department, position } = await req.json()
+  const { full_name, email, password, department, position, company_name } = await req.json()
   if (!full_name || !email || !password) {
     return NextResponse.json({ error: 'กรุณากรอกข้อมูลให้ครบ' }, { status: 400 })
   }
 
   const admin = await createAdminClient()
 
-  // สร้าง auth user
   const { data: newUser, error: authError } = await admin.auth.admin.createUser({
     email,
     password,
     email_confirm: true,
-    user_metadata: { full_name, department, position, role: 'employee' },
+    user_metadata: { full_name, department, position, company_name, role: 'employee' },
   })
 
   if (authError) {
@@ -31,9 +30,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: authError.message }, { status: 500 })
   }
 
-  // อัปเดต profile เพิ่มเติม
   if (newUser.user) {
-    await admin.from('users').update({ department, position }).eq('id', newUser.user.id)
+    await admin.from('users').update({ department, position, company_name }).eq('id', newUser.user.id)
   }
 
   return NextResponse.json({ success: true, userId: newUser.user?.id })
