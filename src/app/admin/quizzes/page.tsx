@@ -1,6 +1,8 @@
-export const dynamic = 'force-dynamic'
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
+import DeleteQuizButton from './DeleteQuizButton'
+
+export const dynamic = 'force-dynamic'
 
 export default async function QuizzesPage({ searchParams }: { searchParams: Promise<{ course?: string }> }) {
   const { course: courseId } = await searchParams
@@ -65,7 +67,13 @@ export default async function QuizzesPage({ searchParams }: { searchParams: Prom
                   <p className="text-xs text-gray-500 italic mt-2 ml-8">💡 {q.explanation}</p>
                 )}
               </div>
-              <button className="text-xs text-blue-600 hover:text-blue-800 font-medium flex-shrink-0">แก้ไข</button>
+              <div className="flex gap-2 flex-shrink-0">
+                <Link href={`/admin/quizzes/${q.id}/edit?course=${courseId}`}
+                  className="text-xs text-blue-600 hover:text-blue-800 font-medium border border-blue-200 px-2.5 py-1 rounded-lg hover:bg-blue-50 transition-colors">
+                  แก้ไข
+                </Link>
+                <DeleteQuizButton quizId={q.id} courseId={courseId || ''} />
+              </div>
             </div>
           </div>
         ))}
