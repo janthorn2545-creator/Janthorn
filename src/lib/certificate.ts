@@ -1,3 +1,6 @@
+// ชื่อบริษัทเจ้าของระบบ — แก้ตรงนี้เพื่อเปลี่ยน
+const SITE_COMPANY = 'Bolt & Nut Industry Co., Ltd.'
+
 export function getCertificateHTML(data: {
   full_name: string
   company_name?: string
@@ -34,27 +37,21 @@ export function getCertificateHTML(data: {
         <div style="font-size:6px;color:#94a3b8;margin-top:2px;">PHOTO</div>
        </div>`
 
-  // script สำหรับ auto print (PDF) หรือ export JPG
   const autoScript = fmt === 'jpg' ? `
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script>
     window.onload = function() {
-      // วาดลง canvas แล้ว save เป็น JPG
       setTimeout(function() {
         const card = document.querySelector('.card');
-        if (typeof html2canvas !== 'undefined') {
-          html2canvas(card, { scale: 3, useCORS: true, allowTaint: true }).then(function(canvas) {
-            const link = document.createElement('a');
-            link.download = 'contractor-card-${cardNo}.jpg';
-            link.href = canvas.toDataURL('image/jpeg', 0.95);
-            link.click();
-          });
-        } else {
-          window.print();
-        }
+        html2canvas(card, { scale: 3, useCORS: true, allowTaint: true }).then(function(canvas) {
+          const link = document.createElement('a');
+          link.download = 'contractor-card-${cardNo}.jpg';
+          link.href = canvas.toDataURL('image/jpeg', 0.95);
+          link.click();
+        });
       }, 800);
     }
     </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   ` : `
     <script>
     window.onload = function() {
@@ -63,7 +60,6 @@ export function getCertificateHTML(data: {
     </script>
   `
 
-  // landscape card
   return `<!DOCTYPE html><html lang="th"><head><meta charset="UTF-8">
 <title>บัตรผู้รับเหมา - ${data.full_name}</title>
 <style>
@@ -72,8 +68,8 @@ export function getCertificateHTML(data: {
   body{font-family:'Sarabun',sans-serif;background:#e5e7eb;display:flex;justify-content:center;align-items:center;min-height:100vh;}
   .card{width:86mm;height:54mm;background:#fff;border-radius:3mm;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.25);display:flex;flex-direction:column;}
   .header{background:#1e293b;padding:2mm 3.5mm;display:flex;align-items:center;justify-content:space-between;}
-  .company-header{font-size:6pt;font-weight:700;color:#fff;display:flex;align-items:center;gap:1.5mm;}
-  .card-no{font-size:6pt;font-weight:700;color:#f59e0b;letter-spacing:0.5px;}
+  .site-company{font-size:6pt;font-weight:700;color:#fff;display:flex;align-items:center;gap:1.5mm;white-space:nowrap;}
+  .card-no{font-size:6pt;font-weight:700;color:#f59e0b;letter-spacing:0.5px;white-space:nowrap;}
   .body{flex:1;display:flex;gap:3mm;padding:2.5mm 3.5mm;}
   .photo-col{width:22mm;flex-shrink:0;}
   .photo-box{width:22mm;height:28mm;border:1.5px solid #e2e8f0;border-radius:3px;overflow:hidden;background:#f8fafc;}
@@ -99,10 +95,15 @@ export function getCertificateHTML(data: {
 ${autoScript}
 </head><body>
 <div class="card">
+  <!-- Header: ชื่อบริษัทเจ้าของระบบ — ตายตัว แก้ไขไม่ได้ -->
   <div class="header">
-    <div class="company-header"><span style="font-size:9pt;">🔩</span>${data.company_name || 'TRAINHUB'}</div>
+    <div class="site-company">
+      <span style="font-size:9pt;">🔩</span>
+      ${SITE_COMPANY}
+    </div>
     <div class="card-no">${cardNo}</div>
   </div>
+
   <div class="body">
     <div class="photo-col">
       <div class="photo-box">${photoContent}</div>
@@ -112,6 +113,7 @@ ${autoScript}
       <div>
         <div class="field-label">ชื่อ-นามสกุล / NAME</div>
         <div class="field-value">${data.full_name}</div>
+        <!-- บริษัทต้นสังกัด: ตามที่พนักงานกรอกในโปรไฟล์ -->
         <div style="margin-top:2mm;">
           <div class="field-label">บริษัทต้นสังกัด / COMPANY</div>
           <div class="field-value-sm">${data.company_name || '—'}</div>
@@ -135,6 +137,7 @@ ${autoScript}
       </div>
     </div>
   </div>
+
   <div class="footer">
     <div class="footer-text">โปรดแสดงบัตรนี้ทุกครั้งเมื่อเข้าปฏิบัติงานในพื้นที่</div>
     <div class="cert-code">${data.cert_code}</div>
