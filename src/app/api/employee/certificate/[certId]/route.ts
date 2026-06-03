@@ -9,10 +9,10 @@ export async function GET(
 ) {
   const { certId } = await params
   const { searchParams } = new URL(req.url)
-  const orientation = (searchParams.get('orientation') || 'portrait') as 'portrait' | 'landscape'
   const photo_x = Number(searchParams.get('photo_x') || 50)
   const photo_y = Number(searchParams.get('photo_y') || 50)
   const photo_scale = Number(searchParams.get('photo_scale') || 100)
+  const format = searchParams.get('format') || 'pdf'
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -31,7 +31,7 @@ export async function GET(
   }
 
   const issueYear = new Date(cert.issued_at).getFullYear()
-  const cardNumber = `CON-${issueYear}-${cert.cert_code.replace('CERT-','').substring(0,3)}`
+  const cardNumber = `CON-${issueYear}-${cert.cert_code.replace('CERT-', '').substring(0, 3)}`
 
   const html = getCertificateHTML({
     full_name: (cert.users as any).full_name,
@@ -41,16 +41,17 @@ export async function GET(
     issued_at: cert.issued_at,
     photo_url: (cert.users as any).photo_url || '',
     card_number: cardNumber,
-    orientation,
+    orientation: 'landscape',
     photo_x,
     photo_y,
     photo_scale,
+    format,
   })
 
+  // ส่ง HTML พร้อม script print สำหรับ PDF/JPG
   return new NextResponse(html, {
     headers: {
       'Content-Type': 'text/html; charset=utf-8',
-      'Content-Disposition': `inline; filename="contractor-card-${cardNumber}.html"`,
     },
   })
 }
