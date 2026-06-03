@@ -3,7 +3,6 @@ import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
-
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -20,33 +19,22 @@ export async function middleware(request: NextRequest) {
       },
     }
   )
-
   const { data: { user } } = await supabase.auth.getUser()
   const path = request.nextUrl.pathname
 
-  // Redirect unauthenticated users to login
   if (!user && (path.startsWith('/admin') || path.startsWith('/employee'))) {
     return NextResponse.redirect(new URL('/auth/login', request.url))
   }
-
-  // Redirect authenticated users away from auth pages
   if (user && path.startsWith('/auth')) {
     return NextResponse.redirect(new URL('/', request.url))
   }
-
-  // Protect admin routes
   if (user && path.startsWith('/admin')) {
     const { data: profile } = await supabase
-      .from('users')
-      .select('role')
-      .eq('id', user.id)
-      .single()
-
-    if (profile?.role !== 'admin') {
+      .from('users').select('role').eq('id', user.id).single()
+    if (!['superadmin', 'admin'].includes(profile?.role || '')) {
       return NextResponse.redirect(new URL('/employee/dashboard', request.url))
     }
   }
-
   return supabaseResponse
 }
 
