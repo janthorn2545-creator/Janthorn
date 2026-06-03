@@ -12,7 +12,8 @@ export async function GET(
   const photo_x = Number(searchParams.get('photo_x') || 50)
   const photo_y = Number(searchParams.get('photo_y') || 50)
   const photo_scale = Number(searchParams.get('photo_scale') || 100)
-  const format = searchParams.get('format') || 'pdf'
+  const formatParam = searchParams.get('format')
+  const format: 'pdf' | 'jpg' = formatParam === 'jpg' ? 'jpg' : 'pdf'
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -48,10 +49,7 @@ export async function GET(
     format,
   })
 
-  // ส่ง HTML พร้อม script print สำหรับ PDF/JPG
   return new NextResponse(html, {
-    headers: {
-      'Content-Type': 'text/html; charset=utf-8',
-    },
+    headers: { 'Content-Type': 'text/html; charset=utf-8' },
   })
 }
