@@ -25,7 +25,6 @@ export default function DocumentUploader() {
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0]
     if (!f) return
-    if (f.size > 20 * 1024 * 1024) { setError('ไฟล์ต้องไม่เกิน 20MB'); return }
     setFile(f)
     if (!form.title) setForm(prev => ({ ...prev, title: f.name.replace(/\.[^/.]+$/, '') }))
     setError('')
@@ -71,6 +70,12 @@ export default function DocumentUploader() {
     }, 500)
   }
 
+  const fileSizeLabel = file
+    ? file.size < 1024*1024
+      ? `${(file.size/1024).toFixed(0)} KB`
+      : `${(file.size/1024/1024).toFixed(1)} MB`
+    : ''
+
   if (!open) return (
     <button onClick={() => setOpen(true)}
       className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors flex items-center gap-1.5">
@@ -88,31 +93,37 @@ export default function DocumentUploader() {
         </div>
 
         <form onSubmit={handleUpload} className="p-6 space-y-4">
-          {error && <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-2.5 text-sm text-red-700">{error}</div>}
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-2.5 text-sm text-red-700">{error}</div>
+          )}
 
           {/* File drop area */}
           <div
             onClick={() => fileRef.current?.click()}
             onDragOver={e => e.preventDefault()}
-            onDrop={e => { e.preventDefault(); const f=e.dataTransfer.files[0]; if(f){const ev={target:{files:[f]}} as any; handleFile(ev)} }}
+            onDrop={e => {
+              e.preventDefault()
+              const f = e.dataTransfer.files[0]
+              if (f) { const ev = { target: { files: [f] } } as any; handleFile(ev) }
+            }}
             className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-colors ${
-              file ? 'border-green-400 bg-green-50' : 'border-gray-300 hover:border-blue-400 hover:bg-blue-50'}`}>
+              file ? 'border-green-400 bg-green-50' : 'border-gray-300 hover:border-blue-400 hover:bg-blue-50'
+            }`}>
             {file ? (
               <div>
                 <div className="text-2xl mb-1">✅</div>
-                <div className="text-sm font-medium text-green-700">{file.name}</div>
-                <div className="text-xs text-green-600">{(file.size/1024/1024).toFixed(2)} MB</div>
+                <div className="text-sm font-medium text-green-700 truncate px-4">{file.name}</div>
+                <div className="text-xs text-green-600 mt-0.5">{fileSizeLabel}</div>
               </div>
             ) : (
               <div>
                 <div className="text-3xl mb-2">📁</div>
                 <div className="text-sm font-medium text-gray-700">คลิกหรือลากไฟล์มาวางที่นี่</div>
-                <div className="text-xs text-gray-400 mt-1">PDF, Excel, Word, รูปภาพ — ไม่เกิน 20MB</div>
+                <div className="text-xs text-gray-400 mt-1">PDF, Excel, Word, รูปภาพ, ZIP และอื่นๆ</div>
+                <div className="text-xs text-blue-500 mt-0.5 font-medium">ไม่จำกัดขนาดไฟล์</div>
               </div>
             )}
-            <input ref={fileRef} type="file" className="hidden"
-              accept=".pdf,.xlsx,.xls,.csv,.doc,.docx,.png,.jpg,.jpeg,.zip"
-              onChange={handleFile} />
+            <input ref={fileRef} type="file" className="hidden" onChange={handleFile} />
           </div>
 
           <div>
@@ -143,10 +154,12 @@ export default function DocumentUploader() {
           {uploading && (
             <div>
               <div className="flex justify-between text-xs text-gray-500 mb-1">
-                <span>กำลังอัปโหลด...</span><span>{progress}%</span>
+                <span>กำลังอัปโหลด{file ? ` ${fileSizeLabel}` : ''}...</span>
+                <span>{progress}%</span>
               </div>
               <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                <div className="h-full bg-blue-600 rounded-full transition-all duration-300" style={{ width: `${progress}%` }} />
+                <div className="h-full bg-blue-600 rounded-full transition-all duration-300"
+                  style={{ width: `${progress}%` }} />
               </div>
             </div>
           )}
