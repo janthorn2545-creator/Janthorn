@@ -13,13 +13,12 @@ export default function UserActions({ userId, userName, currentRole, myRole }: P
   const [showMenu, setShowMenu] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [confirmRole, setConfirmRole] = useState(false)
-  const [newRole, setNewRole] = useState('')
   const [loading, setLoading] = useState(false)
   const [msg, setMsg] = useState('')
   const router = useRouter()
 
-  const isSuperAdmin = myRole === 'superadmin'
-  const canModify = isSuperAdmin || currentRole === 'employee'
+  const newRole = currentRole === 'employee' ? 'admin' : 'employee'
+  const newRoleLabel = newRole === 'admin' ? '🛡️ ผู้ดูแล' : '👤 พนักงาน'
 
   const handleDelete = async () => {
     setLoading(true)
@@ -37,37 +36,26 @@ export default function UserActions({ userId, userName, currentRole, myRole }: P
     })
     const data = await res.json()
     setLoading(false); setConfirmRole(false)
-    if (res.ok) { setMsg('เปลี่ยน role แล้ว'); setTimeout(() => { setMsg(''); router.refresh() }, 1500) }
+    if (res.ok) { setMsg(`เปลี่ยนเป็น ${newRoleLabel} แล้ว`); setTimeout(() => { setMsg(''); router.refresh() }, 1500) }
     else setMsg(data.error || 'เกิดข้อผิดพลาด')
   }
 
-  const roleOptions = isSuperAdmin
-    ? [{ value: 'superadmin', label: '⭐ ผู้ดูแลหลัก' }, { value: 'admin', label: '🛡️ ผู้ดูแล' }, { value: 'employee', label: '👤 พนักงาน' }].filter(r => r.value !== currentRole)
-    : [{ value: 'admin', label: '🛡️ ผู้ดูแล' }, { value: 'employee', label: '👤 พนักงาน' }].filter(r => r.value !== currentRole)
-
   if (confirmRole) return (
-    <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 flex flex-col gap-2 min-w-[220px]">
-      <div className="text-sm font-medium text-blue-800">เปลี่ยน role "{userName}"</div>
-      <select value={newRole} onChange={e => setNewRole(e.target.value)}
-        className="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none">
-        <option value="">-- เลือก role --</option>
-        {roleOptions.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
-      </select>
+    <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 flex flex-col gap-2 min-w-[200px]">
+      <div className="text-sm font-medium text-blue-800">เปลี่ยน "{userName}" เป็น {newRoleLabel}?</div>
       <div className="flex gap-2">
-        <button onClick={handleRoleChange} disabled={loading || !newRole}
+        <button onClick={handleRoleChange} disabled={loading}
           className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white text-xs font-medium py-1.5 rounded-lg">
           {loading ? '...' : 'ยืนยัน'}
         </button>
         <button onClick={() => setConfirmRole(false)}
-          className="flex-1 border border-gray-300 text-gray-600 text-xs py-1.5 rounded-lg hover:bg-gray-50">
-          ยกเลิก
-        </button>
+          className="flex-1 border border-gray-300 text-gray-600 text-xs py-1.5 rounded-lg">ยกเลิก</button>
       </div>
     </div>
   )
 
   if (confirmDelete) return (
-    <div className="bg-red-50 border border-red-200 rounded-xl p-3 flex flex-col gap-2 min-w-[220px]">
+    <div className="bg-red-50 border border-red-200 rounded-xl p-3 flex flex-col gap-2 min-w-[200px]">
       <div className="text-sm font-medium text-red-800">ยืนยันลบ "{userName}"?</div>
       <div className="text-xs text-red-600">ข้อมูลทั้งหมดจะถูกลบถาวร</div>
       <div className="flex gap-2">
@@ -76,15 +64,9 @@ export default function UserActions({ userId, userName, currentRole, myRole }: P
           {loading ? '...' : 'ยืนยันลบ'}
         </button>
         <button onClick={() => setConfirmDelete(false)}
-          className="flex-1 border border-gray-300 text-gray-600 text-xs py-1.5 rounded-lg hover:bg-gray-50">
-          ยกเลิก
-        </button>
+          className="flex-1 border border-gray-300 text-gray-600 text-xs py-1.5 rounded-lg">ยกเลิก</button>
       </div>
     </div>
-  )
-
-  if (!canModify) return (
-    <div className="text-xs text-gray-400 border border-gray-200 px-3 py-1.5 rounded-lg">🔒 ไม่มีสิทธิ์</div>
   )
 
   return (
@@ -95,16 +77,21 @@ export default function UserActions({ userId, userName, currentRole, myRole }: P
         ⚙️ จัดการ <span className="text-xs">{showMenu ? '▲' : '▼'}</span>
       </button>
       {showMenu && (
-        <div className="absolute right-0 top-10 bg-white border border-gray-200 rounded-xl shadow-lg z-10 w-52 overflow-hidden">
+        <div className="absolute right-0 top-10 bg-white border border-gray-200 rounded-xl shadow-lg z-10 w-48 overflow-hidden">
           <button onClick={() => { setShowMenu(false); setConfirmRole(true) }}
-            className="w-full text-left px-4 py-3 text-sm hover:bg-blue-50 flex items-center gap-2 border-b border-gray-100">
+            className="w-full text-left px-4 py-2.5 text-sm hover:bg-blue-50 flex items-center gap-2 border-b border-gray-100">
             <span>🔄</span>
-            <div><div className="font-medium text-blue-700">เปลี่ยน Role</div><div className="text-xs text-gray-400">ปัจจุบัน: {currentRole}</div></div>
+            <div>
+              <div className="font-medium text-blue-700">
+                {currentRole === 'employee' ? 'เพิ่มเป็นผู้ดูแล' : 'ลดเป็นพนักงาน'}
+              </div>
+              <div className="text-xs text-gray-400">ปัจจุบัน: {currentRole === 'employee' ? 'พนักงาน' : 'ผู้ดูแล'}</div>
+            </div>
           </button>
           <button onClick={() => { setShowMenu(false); setConfirmDelete(true) }}
-            className="w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2">
+            className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2">
             <span>🗑️</span>
-            <div><div className="font-medium">ลบบัญชี</div><div className="text-xs text-red-400">ลบข้อมูลทั้งหมดถาวร</div></div>
+            <div><div className="font-medium">ลบบัญชี</div><div className="text-xs text-red-400">ลบถาวร</div></div>
           </button>
           <button onClick={() => setShowMenu(false)}
             className="w-full text-left px-4 py-2 text-xs text-gray-400 hover:bg-gray-50 border-t border-gray-100">✕ ปิด</button>

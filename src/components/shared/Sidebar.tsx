@@ -4,8 +4,6 @@ import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 
-type UserRole = 'superadmin' | 'admin' | 'employee'
-
 const adminNav = [
   { href: '/admin/dashboard', label: 'แดชบอร์ด', icon: '📊' },
   { href: '/admin/courses', label: 'คอร์สทั้งหมด', icon: '📚' },
@@ -28,7 +26,7 @@ const employeeNav = [
 ]
 
 interface SidebarProps {
-  role: UserRole
+  role: string
   user: { full_name: string; email: string; department?: string }
   pendingCount?: number
 }
@@ -37,8 +35,8 @@ export default function Sidebar({ role, user, pendingCount }: SidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
   const supabase = createClient()
-  const isAdminArea = role === 'admin' || role === 'superadmin'
-  const nav = isAdminArea ? adminNav : employeeNav
+  const isAdmin = ['admin', 'superadmin'].includes(role)
+  const nav = isAdmin ? adminNav : employeeNav
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
@@ -47,12 +45,6 @@ export default function Sidebar({ role, user, pendingCount }: SidebarProps) {
   }
 
   const initials = user.full_name?.split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase() || '?'
-
-  const roleBadge = role === 'superadmin'
-    ? { label: '⭐ ผู้ดูแลหลัก', cls: 'bg-yellow-100 text-yellow-800' }
-    : role === 'admin'
-    ? { label: '🛡️ ผู้ดูแล', cls: 'bg-blue-100 text-blue-700' }
-    : { label: '👤 พนักงาน', cls: 'bg-green-100 text-green-700' }
 
   return (
     <aside className="w-56 flex-shrink-0 bg-white border-r border-gray-200 flex flex-col h-screen sticky top-0">
@@ -63,8 +55,9 @@ export default function Sidebar({ role, user, pendingCount }: SidebarProps) {
           </div>
           <div>
             <div className="text-sm font-semibold text-gray-900">TrainHub</div>
-            <div className={cn('text-xs px-1.5 py-0.5 rounded-full font-medium mt-0.5 inline-block', roleBadge.cls)}>
-              {roleBadge.label}
+            <div className={cn('text-xs px-1.5 py-0.5 rounded-full font-medium mt-0.5 inline-block',
+              isAdmin ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700')}>
+              {isAdmin ? '🛡️ ผู้ดูแล' : '👤 พนักงาน'}
             </div>
           </div>
         </div>

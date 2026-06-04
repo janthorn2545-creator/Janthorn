@@ -8,7 +8,7 @@ export default async function Home() {
   if (!user) redirect('/auth/login')
   const { data: profile } = await supabase
     .from('users').select('role').eq('id', user.id).single()
-  if (profile?.role === 'superadmin' || profile?.role === 'admin') {
+  if (['superadmin', 'admin'].includes(profile?.role || '')) {
     redirect('/admin/dashboard')
   }
   redirect('/employee/dashboard')
