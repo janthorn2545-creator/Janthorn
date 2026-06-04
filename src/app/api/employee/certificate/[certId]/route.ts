@@ -27,7 +27,8 @@ export async function GET(
   if (!cert) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
   const { data: profile } = await supabase.from('users').select('role').eq('id', user.id).single()
-  if (cert.user_id !== user.id && profile?.role !== 'admin') {
+  const isAdmin = ['admin', 'superadmin'].includes(profile?.role || '')
+  if (cert.user_id !== user.id && !isAdmin) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
