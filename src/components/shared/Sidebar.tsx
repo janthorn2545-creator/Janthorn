@@ -13,6 +13,7 @@ const adminNav = [
   { href: '/admin/approvals', label: 'อนุมัติสิทธิ์', icon: '✅' },
   { href: '/admin/users', label: 'พนักงาน', icon: '👥' },
   { href: '/admin/scores', label: 'คะแนน & รายงาน', icon: '🏆' },
+  { href: '/admin/card-maker', label: 'สร้างบัตร Custom', icon: '🎨' },
   { href: '/admin/settings', label: 'ตั้งค่า', icon: '⚙️' },
 ]
 
