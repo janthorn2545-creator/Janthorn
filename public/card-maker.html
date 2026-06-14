@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ID Card Studio</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Inter', 'Sarabun', sans-serif; background: #0f172a; color: #f1f5f9; min-height: 100vh; }
+.topbar { position: sticky; top: 0; z-index: 100; background: rgba(15,23,42,.9); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,.06); height: 56px; display: flex; align-items: center; padding: 0 20px; justify-content: space-between; }
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand-icon { width: 32px; height: 32px; background: #6366f1; border-radius: 8px; display: grid; place-items: center; font-size: 15px; }
+.brand-name { font-size: 15px; font-weight: 800; }
+.brand-name span { color: #818cf8; }
+.brand-sub { font-size: 10px; color: #475569; font-family: 'JetBrains Mono', monospace; margin-top: 1px; }
+.topbar-right { display: flex; gap: 8px; }
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 9px; font-size: 13px; font-weight: 700; border: none; cursor: pointer; font-family: 'Inter', sans-serif; transition: all .2s; }
+.btn-ghost { background: rgba(30,41,59,.8); color: #94a3b8; border: 1px solid rgba(71,85,105,.5); }
+.btn-ghost:hover { color: #f1f5f9; border-color: #64748b; }
+.btn-indigo { background: linear-gradient(135deg,#6366f1,#a855f7); color: #fff; }
+.btn-indigo:hover { opacity: .9; }
+.btn-green { background: linear-gradient(135deg,#22c55e,#16a34a); color: #fff; font-size: 14px; padding: 12px 24px; border-radius: 12px; }
+.btn-green:hover { opacity: .9; }
+.btn-slate { background: rgba(30,41,59,.8); color: #94a3b8; border: 1px solid rgba(71,85,105,.5); font-size: 14px; padding: 12px 20px; border-radius: 12px; }
+.btn-slate:hover { color: #f1f5f9; }
+.hero { background: linear-gradient(135deg,#0f172a 0%,#1a1033 50%,#0f1a10 100%); border-bottom: 1px solid rgba(255,255,255,.04); padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+.hero h2 { font-size: 16px; font-weight: 800; }
+.hero h2 span { color: #818cf8; }
+.hero p { font-size: 11px; color: #475569; margin-top: 3px; }
+.templates { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.tmpl { display: flex; align-items: center; gap: 5px; padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; border: 1px solid; cursor: pointer; font-family: 'Inter', sans-serif; background: none; transition: all .2s; }
+.tmpl-a { border-color: rgba(245,158,11,.4); color: #f59e0b; }
+.tmpl-a:hover { background: #f59e0b; color: #000; }
+.tmpl-b { border-color: rgba(99,102,241,.4); color: #818cf8; }
+.tmpl-b:hover { background: #6366f1; color: #fff; }
+.tmpl-c { border-color: rgba(34,197,94,.4); color: #34d399; }
+.tmpl-c:hover { background: #22c55e; color: #fff; }
+.workspace { display: flex; min-height: calc(100vh - 110px); }
+.sidebar { width: 300px; flex-shrink: 0; background: rgba(15,23,42,.6); border-right: 1px solid rgba(255,255,255,.04); overflow-y: auto; padding: 12px 14px; display: flex; flex-direction: column; gap: 12px; }
+.sidebar::-webkit-scrollbar { width: 3px; }
+.sidebar::-webkit-scrollbar-thumb { background: rgba(99,102,241,.2); border-radius: 4px; }
+.sec-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .14em; color: #475569; display: flex; align-items: center; gap: 5px; padding-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,.04); }
+.panel { background: rgba(30,41,59,.6); border: 1px solid rgba(255,255,255,.05); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+.field { display: flex; flex-direction: column; gap: 4px; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+label.lbl { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: #475569; }
+.inp { background: rgba(15,23,42,.7); border: 1px solid rgba(71,85,105,.4); border-radius: 8px; padding: 7px 10px; color: #e2e8f0; font-size: 12px; font-family: 'Inter', 'Sarabun', sans-serif; font-weight: 500; width: 100%; transition: border-color .15s; }
+.inp:focus { outline: none; border-color: #6366f1; }
+.inp-mono { font-family: 'JetBrains Mono', monospace; }
+.inp-num { width: 52px; text-align: center; background: rgba(99,102,241,.1); border: 1px solid rgba(99,102,241,.3); border-radius: 7px; padding: 4px 6px; color: #a5b4fc; font-size: 11px; font-family: 'JetBrains Mono', monospace; }
+.inp-num:focus { outline: none; border-color: #6366f1; }
+.color-wrap { display: flex; gap: 6px; align-items: center; }
+input[type=color] { width: 30px; height: 30px; border: 1px solid rgba(71,85,105,.5); border-radius: 6px; cursor: pointer; background: transparent; padding: 2px; flex-shrink: 0; }
+.presets { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.preset { display: flex; align-items: center; gap: 6px; padding: 6px 8px; border-radius: 8px; background: rgba(15,23,42,.5); border: 1px solid rgba(71,85,105,.3); color: #94a3b8; font-size: 10px; font-weight: 700; cursor: pointer; transition: all .15s; font-family: 'Inter', sans-serif; }
+.preset:hover { border-color: #64748b; color: #e2e8f0; background: rgba(30,41,59,.8); }
+.preset-dot { width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0; }
+.upload-area { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 14px; border: 1.5px dashed rgba(71,85,105,.5); border-radius: 10px; cursor: pointer; transition: all .15s; }
+.upload-area:hover { border-color: #6366f1; background: rgba(99,102,241,.05); }
+.upload-area svg { width: 20px; height: 20px; color: #475569; }
+.upload-area:hover svg { color: #818cf8; }
+.upload-text { font-size: 11px; color: #475569; font-weight: 700; }
+.upload-area:hover .upload-text { color: #94a3b8; }
+.logo-row { display: flex; gap: 6px; }
+.logo-btn { flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px; padding: 7px; border: 1px dashed rgba(71,85,105,.4); border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: 700; color: #475569; transition: all .15s; }
+.logo-btn:hover { border-color: #6366f1; color: #818cf8; }
+.logo-default { padding: 7px 10px; border: 1px solid rgba(71,85,105,.4); border-radius: 8px; cursor: pointer; background: rgba(15,23,42,.5); color: #64748b; font-size: 14px; transition: all .15s; }
+.logo-default:hover { color: #f59e0b; border-color: rgba(245,158,11,.4); }
+.range-row { display: flex; flex-direction: column; gap: 4px; }
+.range-header { display: flex; justify-content: space-between; align-items: center; }
+.range-val { font-size: 10px; font-family: 'JetBrains Mono', monospace; color: #818cf8; }
+input[type=range] { -webkit-appearance: none; width: 100%; height: 4px; background: rgba(71,85,105,.4); border-radius: 4px; outline: none; }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 13px; height: 13px; border-radius: 50%; background: #6366f1; cursor: pointer; }
+.range-tip { font-size: 10px; color: #334155; display: flex; align-items: center; gap: 4px; }
+.font-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 3px; }
+.font-lbl { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: #475569; }
+.font-size-group { display: flex; align-items: center; gap: 4px; }
+.font-size-tag { font-size: 9px; color: #6366f1; font-weight: 700; }
+.preview { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 24px 20px; gap: 16px; background: radial-gradient(ellipse at 60% 20%,rgba(99,102,241,.04) 0%,transparent 60%); overflow-x: auto; }
+.preview-header { width: 100%; max-width: 680px; display: flex; justify-content: space-between; align-items: center; }
+.live-badge { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: #64748b; }
+.live-dot { width: 7px; height: 7px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 6px #22c55e; animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{box-shadow:0 0 4px #22c55e;} 50%{box-shadow:0 0 12px #22c55e;} }
+.cr80-tag { font-size: 10px; color: #334155; font-family: 'JetBrains Mono', monospace; background: rgba(30,41,59,.7); padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(71,85,105,.3); }
+#id-card-preview { width: 634px; height: 400px; min-width: 634px; max-width: 634px; min-height: 400px; max-height: 400px; overflow: hidden; border-radius: 18px; box-shadow: 0 0 0 1px rgba(255,255,255,.06), 0 20px 60px rgba(0,0,0,.7); display: flex; flex-direction: column; flex-shrink: 0; font-size: 16px; line-height: 1.5; letter-spacing: normal; }
+.action-row { display: flex; gap: 10px; width: 100%; max-width: 680px; }
+.action-row .btn-green { flex: 1; justify-content: center; }
+.tip { width: 100%; max-width: 680px; background: rgba(245,158,11,.05); border: 1px solid rgba(245,158,11,.15); border-radius: 12px; padding: 12px 16px; display: flex; gap: 8px; align-items: flex-start; font-size: 11px; color: #64748b; line-height: 1.6; }
+.tip strong { color: #e2e8f0; }
+.tip-icon { color: #f59e0b; flex-shrink: 0; margin-top: 1px; font-size: 13px; }
+#toast { position: fixed; bottom: 20px; right: 20px; padding: 12px 20px; border-radius: 12px; font-size: 13px; font-weight: 700; z-index: 9999; transform: translateY(60px); opacity: 0; transition: all .3s cubic-bezier(.4,0,.2,1); }
+#toast.show { transform: translateY(0); opacity: 1; }
+#toast.s { background: linear-gradient(135deg,#22c55e,#16a34a); color: #fff; }
+#toast.e { background: linear-gradient(135deg,#ef4444,#dc2626); color: #fff; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <div class="brand-icon">🪪</div>
+    <div>
+      <div class="brand-name">ID Card <span>Studio</span></div>
+      <div class="brand-sub">Industrial · CR-80</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <button class="btn btn-ghost" onclick="resetForm()">↺ รีเซ็ต</button>
+    <button class="btn btn-indigo" onclick="downloadCard()">⬇ ดาวน์โหลด PNG</button>
+  </div>
+</header>
+<div class="hero">
+  <div>
+    <h2>สร้างบัตร<span>ระดับมืออาชีพ</span></h2>
+    <p>กรอกข้อมูล → ปรับสี/รูป → ดาวน์โหลด PNG ความละเอียดสูง</p>
+  </div>
+  <div class="templates">
+    <span style="font-size:10px;color:#334155;font-weight:700;">แม่แบบ:</span>
+    <button class="tmpl tmpl-a" onclick="applyTemplate('contractor')">⛑ ผู้รับเหมา</button>
+    <button class="tmpl tmpl-b" onclick="applyTemplate('forklift')">🚛 โฟล์คลิฟท์</button>
+    <button class="tmpl tmpl-c" onclick="applyTemplate('employee')">💼 พนักงาน</button>
+  </div>
+</div>
+<div class="workspace">
+  <aside class="sidebar">
+    <div class="sec-label">🎨 สีและธีม</div>
+    <div class="panel">
+      <div class="field-row">
+        <div class="field">
+          <label class="lbl">สีหลัก</label>
+          <div class="color-wrap">
+            <input type="color" id="primaryColorInput" value="#1e293b" oninput="syncColor('primary')">
+            <input type="text" id="primaryColorText" value="#1E293B" class="inp inp-mono" style="font-size:11px;" oninput="hexInput('primary',this.value)">
+          </div>
+        </div>
+        <div class="field">
+          <label class="lbl">สีเน้น</label>
+          <div class="color-wrap">
+            <input type="color" id="accentColorInput" value="#f59e0b" oninput="syncColor('accent')">
+            <input type="text" id="accentColorText" value="#F59E0B" class="inp inp-mono" style="font-size:11px;" oninput="hexInput('accent',this.value)">
+          </div>
+        </div>
+      </div>
+      <div class="presets">
+        <button class="preset" onclick="setColor('#1E293B','#F59E0B')"><span class="preset-dot" style="background:linear-gradient(135deg,#1E293B 50%,#F59E0B 50%)"></span>น้ำเงิน-เหลือง</button>
+        <button class="preset" onclick="setColor('#7f1d1d','#ef4444')"><span class="preset-dot" style="background:linear-gradient(135deg,#7f1d1d 50%,#ef4444 50%)"></span>🔴 อันตราย</button>
+        <button class="preset" onclick="setColor('#78350f','#f59e0b')"><span class="preset-dot" style="background:linear-gradient(135deg,#78350f 50%,#f59e0b 50%)"></span>🟡 ระวัง</button>
+        <button class="preset" onclick="setColor('#14532d','#22c55e')"><span class="preset-dot" style="background:linear-gradient(135deg,#14532d 50%,#22c55e 50%)"></span>🟢 ปลอดภัย</button>
+        <button class="preset" onclick="setColor('#1e3a8a','#60a5fa')"><span class="preset-dot" style="background:linear-gradient(135deg,#1e3a8a 50%,#60a5fa 50%)"></span>🔵 ข้อบังคับ</button>
+        <button class="preset" onclick="setColor('#1e293b','#94a3b8')"><span class="preset-dot" style="background:linear-gradient(135deg,#1e293b 50%,#94a3b8 50%)"></span>⚪ สำนักงาน</button>
+      </div>
+    </div>
+    <div class="sec-label">🏢 หัวบัตร</div>
+    <div class="panel">
+      <div class="field">
+        <label class="lbl">โลโก้</label>
+        <div class="logo-row">
+          <label class="logo-btn">⬆ <span id="logo-name">เลือกโลโก้</span><input type="file" id="logoUpload" accept="image/*" onchange="uploadLogo(this)" style="display:none"></label>
+          <button class="logo-default" onclick="resetLogo()" title="ไอคอน default">⚡</button>
+        </div>
+      </div>
+      <div class="field">
+        <label class="lbl">ชื่อบริษัท / หน่วยงาน</label>
+        <input class="inp" id="companyNameInput" oninput="syncCard()" value="Bolt &amp; Nut Industry Co., Ltd.">
+      </div>
+      <div class="field-row">
+        <div class="field"><label class="lbl">รหัสเอกสาร</label><input class="inp inp-mono" id="docNoInput" oninput="syncCard()" value="CON-2026-001"></div>
+        <div class="field"><label class="lbl">บาร์โค้ด</label><input class="inp inp-mono" id="barcodeInput" oninput="syncCard()" value="CERT-CUSTOM01"></div>
+      </div>
+    </div>
+    <div class="sec-label">📷 รูปถ่าย</div>
+    <div class="panel">
+      <label class="upload-area">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+        <span class="upload-text" id="photo-name">คลิกเพื่ออัปโหลดรูปภาพ</span>
+        <input type="file" id="photoUpload" accept="image/*" onchange="uploadPhoto(this)" style="display:none">
+      </label>
+      <div id="photoControls" style="display:none;flex-direction:column;gap:8px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#475569;">ปรับรูปภาพ</span>
+          <button onclick="resetPhoto()" style="font-size:10px;color:#475569;background:none;border:none;cursor:pointer;font-weight:700;" onmouseover="this.style.color='#818cf8'" onmouseout="this.style.color='#475569'">↺ รีเซ็ต</button>
+        </div>
+        <div class="range-row"><div class="range-header"><span style="font-size:9px;font-weight:700;color:#475569;text-transform:uppercase;">Zoom</span><span class="range-val" id="zoomVal">100%</span></div><input type="range" id="photoZoom" min="50" max="300" value="100" oninput="applyPhoto()"></div>
+        <div class="range-row"><div class="range-header"><span style="font-size:9px;font-weight:700;color:#475569;text-transform:uppercase;">ซ้าย/ขวา</span><span class="range-val" id="xVal">0px</span></div><input type="range" id="photoX" min="-200" max="200" value="0" oninput="applyPhoto()"></div>
+        <div class="range-row"><div class="range-header"><span style="font-size:9px;font-weight:700;color:#475569;text-transform:uppercase;">บน/ล่าง</span><span class="range-val" id="yVal">0px</span></div><input type="range" id="photoY" min="-200" max="200" value="0" oninput="applyPhoto()"></div>
+        <div class="range-tip">👆 ลากรูปในบัตรได้โดยตรง</div>
+      </div>
+    </div>
+    <div class="sec-label">👤 ผู้ถือบัตร</div>
+    <div class="panel">
+      <div class="field">
+        <div class="font-row"><span class="font-lbl">ชื่อ-นามสกุล</span><div class="font-size-group"><span class="font-size-tag">ขนาด</span><input class="inp-num" type="number" id="fsName" value="22" min="10" max="38" oninput="applyFontSizes()"></div></div>
+        <input class="inp" id="holderName" oninput="syncCard()" value="ชื่อ นามสกุล" style="font-weight:700;">
+      </div>
+      <div class="field">
+        <div class="font-row"><span class="font-lbl">บริษัทต้นสังกัด</span><div class="font-size-group"><span class="font-size-tag">ขนาด</span><input class="inp-num" type="number" id="fsCompany" value="12" min="8" max="22" oninput="applyFontSizes()"></div></div>
+        <input class="inp" id="holderCompany" oninput="syncCard()" value="บริษัท โบลท แอนด์ นัท อินดัสตี้ จำกัด">
+      </div>
+      <div class="field">
+        <div class="font-row"><span class="font-lbl">หลักสูตร / สิทธิ์</span><div class="font-size-group"><span class="font-size-tag">ขนาด</span><input class="inp-num" type="number" id="fsCourse" value="12" min="8" max="20" oninput="applyFontSizes()"></div></div>
+        <input class="inp" id="courseInput" oninput="syncCard()" value="หลักสูตร / สิทธิ์การเข้าพื้นที่">
+      </div>
+      <div class="field-row">
+        <div class="field"><label class="lbl">วันออกบัตร</label><input class="inp inp-mono" id="issueDate" oninput="syncCard()" value="1 ม.ค. 2569"></div>
+        <div class="field"><label class="lbl">วันหมดอายุ</label><input class="inp inp-mono" id="expiryDate" oninput="syncCard()" value="1 ม.ค. 2570"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label class="lbl">ประเภท (แท็ก)</label><input class="inp inp-mono" id="badgeText" oninput="syncCard()" value="CONTRACTOR" style="text-transform:uppercase;"></div>
+        <div class="field"><label class="lbl">ข้อความท้าย</label><input class="inp" id="footerText" oninput="syncCard()" value="โปรดแสดงบัตรทุกครั้งเมื่อเข้าพื้นที่"></div>
+      </div>
+      <div class="field">
+        <div class="font-row"><span class="font-lbl">ชื่อบริษัทในหัว</span><div class="font-size-group"><span class="font-size-tag">ขนาด</span><input class="inp-num" type="number" id="fsHeader" value="14" min="9" max="20" oninput="applyFontSizes()"></div></div>
+      </div>
+    </div>
+  </aside>
+  <main class="preview">
+    <div class="preview-header">
+      <div class="live-badge"><span class="live-dot"></span> Real-time Preview</div>
+      <span class="cr80-tag">CR-80 · 634 × 400 px</span>
+    </div>
+    <div id="id-card-preview">
+      <div id="C_HEADER" style="background-color:#1e293b;padding:12px 18px;display:flex;align-items:center;justify-content:space-between;gap:8px;height:56px;flex-shrink:0;overflow:hidden;">
+        <div style="display:flex;align-items:center;gap:8px;min-width:0;flex:1;overflow:hidden;">
+          <div id="C_LOGO" style="width:44px;height:36px;border-radius:7px;background:rgba(255,255,255,.92);display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:2px;">
+            <svg id="C_LOGO_SVG" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="rgba(99,102,241,.8)" style="width:20px;height:20px;"><path fill-rule="evenodd" d="M14.615 1.595a.75.75 0 01.359.852L13.96 6.009h3.14a.75.75 0 01.593 1.21l-7.462 9.542a.75.75 0 01-1.258-.611l1.11-4.113h-3.14a.75.75 0 01-.593-1.21L13.673 1.956a.75.75 0 01.942-.361z" clip-rule="evenodd"/></svg>
+            <img id="C_LOGO_IMG" style="display:none;width:40px;height:30px;object-fit:contain;" alt="">
+          </div>
+          <span id="C_COMPANY" style="font-family:'Inter','Sarabun',sans-serif;font-weight:800;font-size:14px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-0.2px;">Bolt &amp; Nut Industry Co., Ltd.</span>
+        </div>
+        <span id="C_DOCNO" style="font-family:'JetBrains Mono',monospace;font-weight:600;font-size:12px;color:#f59e0b;flex-shrink:0;white-space:nowrap;">CON-2026-001</span>
+      </div>
+      <div style="flex:1;background:#fff;padding:14px 16px;display:flex;gap:14px;overflow:hidden;min-height:0;">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:7px;flex-shrink:0;">
+          <div id="C_PHOTOFRAME" style="width:146px;height:186px;border-radius:9px;overflow:hidden;background:#f1f5f9;border:3px solid #e2e8f0;position:relative;cursor:grab;user-select:none;flex-shrink:0;">
+            <div id="C_PLACEHOLDER" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#cbd5e1" style="width:44px;height:44px;"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+            </div>
+            <img id="C_PHOTO" style="display:none;position:absolute;top:0;left:0;transform-origin:0 0;pointer-events:none;max-width:none;" alt="">
+          </div>
+          <div id="C_BADGE" style="width:146px;padding:5px 4px;border-radius:6px;text-align:center;font-family:'Inter',sans-serif;font-weight:800;font-size:10px;letter-spacing:1.8px;text-transform:uppercase;border:2px solid #f59e0b;color:#92400e;background:rgba(245,158,11,.1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">CONTRACTOR</div>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;min-width:0;overflow:hidden;">
+          <div style="overflow:hidden;">
+            <div style="font-family:'Inter',sans-serif;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#94a3b8;margin-bottom:2px;">ชื่อ-นามสกุล / NAME</div>
+            <div id="C_NAME" style="font-family:'Sarabun',sans-serif;font-weight:700;font-size:22px;color:#0f172a;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">ชื่อ นามสกุล</div>
+          </div>
+          <div style="overflow:hidden;">
+            <div style="font-family:'Inter',sans-serif;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#94a3b8;margin-bottom:2px;">บริษัทต้นสังกัด / COMPANY</div>
+            <div id="C_HOLDCO" style="font-family:'Sarabun',sans-serif;font-weight:600;font-size:12px;color:#475569;line-height:1.3;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">บริษัท โบลท แอนด์ นัท อินดัสตี้ จำกัด</div>
+          </div>
+          <div style="overflow:hidden;">
+            <div style="font-family:'Inter',sans-serif;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#94a3b8;margin-bottom:2px;">หลักสูตร / COURSE</div>
+            <div id="C_COURSE" style="font-family:'Sarabun',sans-serif;font-weight:700;font-size:12px;color:#1e293b;line-height:1.3;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">หลักสูตร / สิทธิ์การเข้าพื้นที่</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding-top:7px;border-top:1px solid #e2e8f0;">
+            <div><div style="font-family:'Inter',sans-serif;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:#94a3b8;">ออกบัตร</div><div id="C_ISSUE" style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;color:#1e293b;margin-top:1px;">1 ม.ค. 2569</div></div>
+            <div><div style="font-family:'Inter',sans-serif;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:#94a3b8;">หมดอายุ</div><div id="C_EXPIRY" style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:#ef4444;margin-top:1px;">1 ม.ค. 2570</div></div>
+          </div>
+        </div>
+      </div>
+      <div style="background:#0f172a;padding:7px 18px;display:flex;align-items:center;justify-content:space-between;height:32px;flex-shrink:0;overflow:hidden;">
+        <span id="C_FOOTER" style="font-family:'Sarabun',sans-serif;font-size:9px;color:rgba(255,255,255,.38);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:420px;">โปรดแสดงบัตรทุกครั้งเมื่อเข้าพื้นที่</span>
+        <span id="C_BARCODE" style="font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(255,255,255,.25);letter-spacing:2px;flex-shrink:0;white-space:nowrap;">CERT-CUSTOM01</span>
+      </div>
+    </div>
+    <div class="action-row">
+      <button class="btn btn-green" onclick="downloadCard()">⬇ ดาวน์โหลดบัตร PNG ความละเอียดสูง</button>
+      <button class="btn btn-slate" onclick="window.print()">🖨 พิมพ์</button>
+    </div>
+    <div class="tip">
+      <span class="tip-icon">💡</span>
+      <p><strong>เคล็ดลับ:</strong> ปรับขนาดตัวอักษรแต่ละช่องได้อิสระ · ลากรูปในบัตรหรือใช้ Slider · PNG ดาวน์โหลด 3× (1902×1200 px) เหมาะพิมพ์บัตร PVC CR-80</p>
+    </div>
+  </main>
+</div>
+<div id="toast"></div>
+<script>
+let photoLoaded=false,pt={scale:1,x:0,y:0},drag={on:false,sx:0,sy:0,ox:0,oy:0};
+const $=id=>document.getElementById(id);
+const T={
+  contractor:{p:'#1e293b',a:'#f59e0b',co:'Bolt & Nut Industry Co., Ltd.',doc:'CON-2026-001',bar:'CERT-CUSTOM01',name:'ชื่อ นามสกุล',hco:'บริษัท โบลท แอนด์ นัท อินดัสตี้ จำกัด',course:'การปฏิบัติงานอย่างปลอดภัยของผู้รับเหมา',iss:'1 ม.ค. 2569',exp:'1 ม.ค. 2570',badge:'CONTRACTOR',footer:'โปรดแสดงบัตรทุกครั้งเมื่อเข้าพื้นที่'},
+  forklift:{p:'#1e3a8a',a:'#60a5fa',co:'Logistics Center & Warehouse',doc:'FL-LIC-2026',bar:'FL-88921-TH',name:'นาย สมชาย รักดี',hco:'ฝ่ายจัดการคลังสินค้ากลาง (WH-02)',course:'ผู้บังคับรถยกไฟฟ้า — Forklift Driver License',iss:'10 ม.ค. 2569',exp:'10 ม.ค. 2572',badge:'FORKLIFT OPERATOR',footer:'ได้รับอนุญาตให้บังคับรถยกในคลังสินค้า'},
+  employee:{p:'#14532d',a:'#22c55e',co:'Green Energy Solution Co., Ltd.',doc:'STAFF-ID',bar:'EMP-9022',name:'นางสาว กัญญารัตน์ ใจงาม',hco:'ฝ่ายทรัพยากรบุคคล',course:'บัตรประจำตัวพนักงานและคีย์การ์ด',iss:'1 มี.ค. 2569',exp:'ไม่มีกำหนดอายุ',badge:'STAFF MEMBER',footer:'เป็นพนักงานของ บจก. กรีน เอ็นเนอร์ยี่ โซลูชั่น'}
+};
+function applyTemplate(k){const d=T[k];if(!d)return;$('primaryColorInput').value=d.p;$('primaryColorText').value=d.p.toUpperCase();$('accentColorInput').value=d.a;$('accentColorText').value=d.a.toUpperCase();$('companyNameInput').value=d.co;$('docNoInput').value=d.doc;$('barcodeInput').value=d.bar;$('holderName').value=d.name;$('holderCompany').value=d.hco;$('courseInput').value=d.course;$('issueDate').value=d.iss;$('expiryDate').value=d.exp;$('badgeText').value=d.badge;$('footerText').value=d.footer;$('fsName').value=22;$('fsCompany').value=12;$('fsCourse').value=12;$('fsHeader').value=14;applyFontSizes();syncCard();updateDesign();}
+function syncCard(){$('C_COMPANY').textContent=$('companyNameInput').value;$('C_DOCNO').textContent=$('docNoInput').value;$('C_NAME').textContent=$('holderName').value;$('C_HOLDCO').textContent=$('holderCompany').value;$('C_COURSE').textContent=$('courseInput').value;$('C_ISSUE').textContent=$('issueDate').value;$('C_EXPIRY').textContent=$('expiryDate').value;$('C_BARCODE').textContent=$('barcodeInput').value;$('C_FOOTER').textContent=$('footerText').value;$('C_BADGE').textContent=$('badgeText').value;}
+function applyFontSizes(){$('C_NAME').style.fontSize=$('fsName').value+'px';$('C_HOLDCO').style.fontSize=$('fsCompany').value+'px';$('C_COURSE').style.fontSize=$('fsCourse').value+'px';$('C_COMPANY').style.fontSize=$('fsHeader').value+'px';}
+function syncColor(t){const v=$(t==='primary'?'primaryColorInput':'accentColorInput').value;$(t==='primary'?'primaryColorText':'accentColorText').value=v.toUpperCase();updateDesign();}
+function hexInput(t,v){if(/^#[0-9A-F]{6}$/i.test(v)){$(t==='primary'?'primaryColorInput':'accentColorInput').value=v;updateDesign();}}
+function setColor(p,a){$('primaryColorInput').value=p;$('primaryColorText').value=p.toUpperCase();$('accentColorInput').value=a;$('accentColorText').value=a.toUpperCase();updateDesign();}
+function updateDesign(){const p=$('primaryColorInput').value,a=$('accentColorInput').value;$('C_HEADER').style.backgroundColor=p;$('C_DOCNO').style.color=a;const b=$('C_BADGE');b.style.borderColor=a;b.style.color=darken(a,.38);b.style.backgroundColor=rgba(a,.1);}
+function rgba(h,al){const r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b=parseInt(h.slice(5,7),16);return `rgba(${r},${g},${b},${al})`;}
+function darken(h,m){return `rgb(${[1,3,5].map(i=>Math.max(0,Math.floor(parseInt(h.slice(i,i+2),16)*m))).join(',')})`;}
+function uploadLogo(input){const f=input.files[0];if(!f)return;$('logo-name').textContent=f.name;const r=new FileReader();r.onload=e=>{$('C_LOGO_SVG').style.display='none';$('C_LOGO_IMG').src=e.target.result;$('C_LOGO_IMG').style.display='block';$('C_LOGO').style.background='rgba(255,255,255,.95)';};r.readAsDataURL(f);}
+function resetLogo(){$('logo-name').textContent='เลือกโลโก้';$('C_LOGO_SVG').style.display='block';$('C_LOGO_IMG').style.display='none';}
+const frame=$('C_PHOTOFRAME');
+frame.addEventListener('mousedown',e=>{if(!photoLoaded)return;drag.on=true;drag.sx=e.clientX;drag.sy=e.clientY;drag.ox=pt.x;drag.oy=pt.y;e.preventDefault();});
+document.addEventListener('mousemove',e=>{if(!drag.on)return;pt.x=drag.ox+(e.clientX-drag.sx);pt.y=drag.oy+(e.clientY-drag.sy);syncSliders();renderPhoto();});
+document.addEventListener('mouseup',()=>drag.on=false);
+frame.addEventListener('touchstart',e=>{if(!photoLoaded)return;const t=e.touches[0];drag.on=true;drag.sx=t.clientX;drag.sy=t.clientY;drag.ox=pt.x;drag.oy=pt.y;e.preventDefault();},{passive:false});
+document.addEventListener('touchmove',e=>{if(!drag.on)return;const t=e.touches[0];pt.x=drag.ox+(t.clientX-drag.sx);pt.y=drag.oy+(t.clientY-drag.sy);syncSliders();renderPhoto();},{passive:false});
+document.addEventListener('touchend',()=>drag.on=false);
+function applyPhoto(){pt.scale=parseFloat($('photoZoom').value)/100;pt.x=parseFloat($('photoX').value);pt.y=parseFloat($('photoY').value);$('zoomVal').textContent=Math.round(pt.scale*100)+'%';$('xVal').textContent=Math.round(pt.x)+'px';$('yVal').textContent=Math.round(pt.y)+'px';renderPhoto();}
+function syncSliders(){$('photoX').value=Math.max(-200,Math.min(200,pt.x));$('photoY').value=Math.max(-200,Math.min(200,pt.y));$('xVal').textContent=Math.round(pt.x)+'px';$('yVal').textContent=Math.round(pt.y)+'px';}
+function renderPhoto(){const img=$('C_PHOTO');if(!photoLoaded)return;const fw=146,fh=186,iw=img.naturalWidth||fw,ih=img.naturalHeight||fh,base=Math.max(fw/iw,fh/ih),s=base*pt.scale,tx=(fw-iw*s)/2+pt.x,ty=(fh-ih*s)/2+pt.y;img.style.width=iw+'px';img.style.height=ih+'px';img.style.transform='translate('+tx+'px,'+ty+'px) scale('+s+')';img.style.transformOrigin='0 0';}
+function resetPhoto(){pt={scale:1,x:0,y:0};$('photoZoom').value=100;$('photoX').value=0;$('photoY').value=0;$('zoomVal').textContent='100%';$('xVal').textContent='0px';$('yVal').textContent='0px';renderPhoto();}
+function uploadPhoto(input){const f=input.files[0];if(!f)return;$('photo-name').textContent=f.name;const r=new FileReader();r.onload=e=>{const img=$('C_PHOTO');img.onload=()=>{photoLoaded=true;resetPhoto();};img.src=e.target.result;img.style.display='block';$('C_PLACEHOLDER').style.display='none';$('photoControls').style.display='flex';frame.style.cursor='grab';};r.readAsDataURL(f);}
+function resetForm(){applyTemplate('contractor');}
+function toast(m,t='s'){const el=$('toast');el.textContent=m;el.className='toast show '+t;setTimeout(()=>el.className='toast',3000);}
+async function downloadCard(){const el=$('id-card-preview');toast('⏳ กำลังสร้างภาพ...','s');await document.fonts.ready;await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));html2canvas(el,{scale:3,useCORS:true,allowTaint:true,backgroundColor:'#ffffff',logging:false,width:634,height:400,onclone(doc){const c=doc.getElementById('id-card-preview');if(c){c.style.width='634px';c.style.height='400px';c.style.minWidth='634px';c.style.maxWidth='634px';c.style.borderRadius='0';c.style.boxShadow='none';c.style.overflow='hidden';}}}).then(canvas=>{const a=document.createElement('a');const name=($('holderName').value||'ID-Card').replace(/[^a-zA-Z0-9]/g,'_');a.download='ID_CARD_'+name+'.png';a.href=canvas.toDataURL('image/png');a.click();toast('✅ ดาวน์โหลดเรียบร้อย','s');}).catch(e=>{console.error(e);toast('❌ เกิดข้อผิดพลาด','e');});}
+window.onload=()=>applyTemplate('contractor');
+</script>
+</body>
+</html>
